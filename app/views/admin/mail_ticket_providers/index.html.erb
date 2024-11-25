@@ -1,0 +1,34 @@
+<div id="content">
+  <div class="contextual">
+    <%= link_to 'New', new_admin_mail_ticket_provider_path, class: 'icon icon-add' %>
+  </div>
+
+  <% if @mail_providers.any? %>
+    <div id="configure-data">
+      <h3>Mail Configuration</h3>
+      <table class="list">
+        <thead>
+          <tr>
+            <th>Provider</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @mail_providers.each do | mail_provider | %>
+            <tr>
+              <td><%= mail_provider.name %></td>
+              <td><%= mail_provider.active  ? 'Active' : 'Inactive' %></td>
+              <td>
+                <%= link_to 'Edit', edit_admin_mail_ticket_provider_path(mail_provider) %> |
+                <%= link_to 'Remove', admin_mail_ticket_provider_path(mail_provider), method: :delete %> 
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <p>No mail provider found.</p>
+  <% end %>
+</div>

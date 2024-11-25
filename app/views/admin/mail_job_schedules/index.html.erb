@@ -1,0 +1,47 @@
+<div id="content">
+  <div class="contextual">
+    <%= link_to 'New', new_admin_mail_job_schedule_path, class: 'icon icon-add' %>
+  </div>
+
+  <% if @jobs.any? %>
+    <div id="configure-data">
+      <h3>Mail Job Schedulers</h3>
+      <table class="list">
+        <thead>
+          <tr>
+            <th>Provider</th>
+            <th>Mail</th>
+            <th>Project</th>
+            <th>Status</th>
+            <th>Inbox Last Sync at</th>
+            <th> Last Sync Mail Count </th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @jobs.each do | job | %>
+            <tr>
+              <td><%= job.provider_name %></td>
+              <td><%= job.email %></td>
+              <td><%= job.project.name %></td>
+              <td><%= job.sync_status %></td>
+              <td><%= job.inbox_last_sync_at || '-' %> </td>
+              <td><%= job.last_sync_email_count || 0 %> </td>
+              <td>
+                <%= link_to 'Edit', edit_admin_mail_job_schedule_path(job) %> |
+                <%= link_to 'Remove', admin_mail_job_schedule_path(job), method: :delete %> |
+                <%= link_to job.is_account_verified? ? "Re-Authenticate" : "Authenticate", provider_login_path, method: :post, class: "btn btn-primary btn-large" %> 
+                <% if job.is_account_verified? %>
+                  |
+                  <%= link_to "Sync Mail", start_mail_sync_path(job) %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <p>No job configuration found.</p>
+  <% end %>
+</div>

@@ -1,0 +1,45 @@
+<%= form_with model: [:admin, mail_provider], html: { class: 'new_issue'} do |f| %>
+  <div class="box tabular filedroplistner">
+    <div id="attributes" class="attributes">
+      <% if mail_provider.errors.any? %>
+          <div id="error_explanation">
+            <h2><%= pluralize(mail_provider.errors.count, "error") %> prohibited this from being saved:</h2>
+            <ul>
+              <% mail_provider.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+      <div class="splitcontent">
+        <div class="splitcontentleft">
+          <p>
+            <%= f.label :name %>
+            <%= f.select :name, options_for_select([['Outlook', 'outlook']]), prompt: 'Choose an email provider' %>
+          </p>
+          <p>
+            <%= f.label :client_id %>
+            <%= f.text_field :client_id, size: 100 %>
+          </p>
+
+          <p>
+            <%= f.label :client_secret %>
+            <%= f.text_field :client_secret, size: 100 %>
+          </p>
+
+          <p>
+            <%= f.label :tenant_id %>
+            <%= f.text_field :tenant_id, size: 100 %>
+          </p>
+
+          <p>
+            <%= f.label :callback_url %>
+            <%= f.url_field :callback_url, size: 100 %>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <%= f.submit mail_provider.new_record? ? 'Create' : 'Update', class: 'btn btn-primary' %>
+<% end %>
+<%= link_to "back", admin_mail_ticket_providers_path %>

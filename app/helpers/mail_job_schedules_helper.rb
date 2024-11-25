@@ -1,0 +1,2 @@
+module MailJobSchedulesHelper
+end

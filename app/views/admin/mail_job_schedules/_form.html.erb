@@ -1,0 +1,59 @@
+<%= form_with model: [:admin, mail_job_schedule], html: { class: 'new_issue'} do |f| %>
+  <div class="box tabular filedroplistner">
+    <div id="attributes" class="attributes">
+      <div class="splitcontent">
+        <% if mail_job_schedule.errors.any? %>
+          <div id="error_explanation">
+            <h2><%= pluralize(mail_job_schedule.errors.count, "error") %> prohibited this Microsoft mail from being saved:</h2>
+            <ul>
+              <% mail_job_schedule.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+        <div class="splitcontentleft">
+          <%= f.fields_for :mail_ticket_token do |token_form| %>
+            <p>
+              <%= token_form.label :mail_ticket_provider_id, "Provider" %>
+              <%= token_form.select :mail_ticket_provider_id, options_from_collection_for_select(@providers, :id, :name), prompt: 'Choose a provider', required: true %>
+            </p>
+          <% end %>
+          <p>
+            <%= f.label :project_id %>
+            <%= f.select :project_id, options_from_collection_for_select(@projects, :id, :name), prompt: 'Choose a project', required: true %>
+          </p>
+
+          <p>
+            <%= f.label :assigned_to_id %>
+            <%= f.select :assigned_to_id, options_from_collection_for_select(@users, :id, :name), prompt: 'Choose a assignee', required: true %>
+          </p>
+
+          <p>
+            <%= f.label :frequency %>
+            <%= f.select :frequency, [["30 minutes", "30.minutes"], ["1 hour", "1.hour"], ["1 day", "1.day"]], {}, class: 'select' %>
+          </p>
+        </div>
+        <div class="splitcontentright">
+          <p>
+            <%= f.label :email %>
+            <%= f.email_field :email, required: true, size: 40 %>
+          </p>
+          <p>
+            <%= f.label :tracker_id %>
+            <%= f.select :tracker_id, options_from_collection_for_select(@trackers, :id, :name), prompt: 'Choose a tracker', required: true %>
+          </p>
+
+          <p>
+            <%= f.label :priority_id %>
+            <%= f.select :priority_id, options_from_collection_for_select(@priorities, :id, :name), prompt: 'Choose a priority', required: true %>
+          </p>
+        </div>
+
+         
+      </div>
+    </div>
+  </div>
+  <%= f.submit mail_job_schedule.new_record? ? 'Create' : 'Update', class: 'btn btn-primary' %>
+<% end %>
+<%= link_to "back", admin_redmine_mail_inbox_accesses_path %>
