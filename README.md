@@ -11,6 +11,10 @@ MailTicketSyncPro is a powerful Redmine plugin designed to seamlessly integrate 
 - Supports nested forms for managing related entities (e.g., mail providers and job schedules).
 - Admin menu with intuitive UI and sidebar integration.
 
+Supported OAuth providers:
+* Azure AD (https://azure.microsoft.com)
+* Google (https://google.com) (Under development)
+
 ## Installation
 
 ### Clone as Submodule
