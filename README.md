@@ -64,7 +64,8 @@ bundle install
 rake redmine:plugins:migrate NAME=mail_ticket_sync_pro RAILS_ENV=production
 ```
 
-4. Set up Active Record encryption keys: Add the following configuration to your config/database.yml or as a separate configuration file:
+4. Set Up Active Record Encryption
+If you are using encrypted columns for sensitive data, add the following configuration to your `config/application.yml`:
 
 ```yaml
 active_record_encryption:
