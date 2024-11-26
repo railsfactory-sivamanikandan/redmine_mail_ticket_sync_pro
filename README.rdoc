@@ -13,6 +13,35 @@ MailTicketSyncPro is a powerful Redmine plugin designed to seamlessly integrate 
 
 ## Installation
 
+### Clone as Submodule
+
+To include this plugin as a submodule in your Redmine project:
+
+1. Navigate to your Redmine `plugins` directory:
+
+```bash
+cd /path/to/redmine/plugins
+```
+
+2. Add the plugin as a submodule:
+
+```bash
+git submodule add https://github.com/railsfactory-sivamanikandan/redmine_mail_ticket_sync_pro.git redmine_mail_ticket_sync_pro
+```
+
+3. Initialize and update the submodule:
+
+```bash
+git submodule init
+git submodule update
+```
+
+4. Install plugin dependencies:
+
+```bash
+bundle install
+```
+
 1. Clone the repository into your Redmine plugins folder:
 
 ```bash
