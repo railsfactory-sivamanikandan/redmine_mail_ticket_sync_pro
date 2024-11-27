@@ -7,5 +7,5 @@ Redmine::Plugin.register :redmine_mail_ticket_sync_pro do
   author_url 'https://github.com/railsfactory-sivamanikandan'
 
   menu :admin_menu, :mail_ticket_providers, { controller: 'admin/mail_ticket_providers', action: 'index' }, caption: 'Mail Providers', after: :plugins, html: { class: 'icon icon-email' }
-  menu :admin_menu, :mail_job_schedules, { controller: 'admin/mail_job_schedules', action: 'index' }, caption: 'Email Sync Settings', after: :plugins, html: { class: 'icon icon-email' }
+  menu :admin_menu, :mail_job_schedules, { controller: 'admin/mail_job_schedules', action: 'index' }, caption: 'Email Sync Jobs', after: :plugins, html: { class: 'icon icon-email' }
 end

@@ -25,6 +25,6 @@ class MailJobSchedule < ApplicationRecord
   private
 
   def generate_schedule_file
-    SchedulerFileGenerator.update_schedule
+    SchedulerFileGenerator.update_schedule if mail_ticket_token.access_token
   end
 end
