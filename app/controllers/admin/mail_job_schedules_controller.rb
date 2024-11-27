@@ -61,13 +61,15 @@ class Admin::MailJobSchedulesController < ApplicationController
   end
 
   def login
-    service = OutlookOauthService.new
-    redirect_to service.authorization_url('user.read mail.readwrite offline_access')
+    url = OauthService.get_authorize_url_for_provider(params[:provider])
+    # service = OutlookOauthService.new
+    redirect_to url
   end
 
   def callback
-    service = OutlookOauthService.new
-    token_data = service.fetch_token(params[:code])
+    token_data = OauthService.get_access_token_for_provider(params[:provider], params[:code])
+    # service = OutlookOauthService.new
+    # token_data = service.fetch_token(params[:code])
     if token_data
       update_outlook_configuration(token_data)
       flash[:notice] = "Logged in successfully! Email: #{token_data[:email]}"
@@ -81,8 +83,9 @@ class Admin::MailJobSchedulesController < ApplicationController
     if @mail_job_schedule.is_account_verified?
       @mail_job_schedule.update(sync_status: 1)
       args = {tracker: @mail_job_schedule.tracker_id, priority: @mail_job_schedule.priority_id, assigned_to: @mail_job_schedule.assigned_to_id}
-      mail_service = OutlookMailService.new(@mail_job_schedule, args)
-      mail_service.fetch_and_create_issues
+      OauthService.fetch_emails_from_provider(@mail_job_schedule.provider_name.downcase, @mail_job_schedule.access_token)
+      # mail_service = OutlookMailService.new(@mail_job_schedule, args)
+      # mail_service.fetch_and_create_issues
     end
     redirect_to admin_mail_job_schedules_path, notice: 'Mail sync successfully.'
   end
