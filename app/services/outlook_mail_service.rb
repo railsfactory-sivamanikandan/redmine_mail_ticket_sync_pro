@@ -46,6 +46,7 @@ class OutlookMailService
       end
     else
       Rails.logger.error("Failed to fetch unread emails: #{response.body}")
+      @job.update!(sync_status: 3, message: response.body)
       []
     end
   end
@@ -99,6 +100,7 @@ class OutlookMailService
       Rails.logger.info("Issue created for email: #{email[:subject]}")
     else
       Rails.logger.error("Failed to create issue for email: #{email[:subject]}")
+      @job.update!(sync_status: 3, message: "Failed to create issue for email: #{email[:subject]}")
     end
   end
 
@@ -113,6 +115,7 @@ class OutlookMailService
       update_outlook_configuration(token_data)
     else
       Rails.logger.error('Failed to refresh token')
+      @job.update!(sync_status: 3, message: 'Failed to refresh token')
     end
   end
 
@@ -122,7 +125,7 @@ class OutlookMailService
 
   def refresh_access_token
     client = oauth_client
-    token = OAuth2::AccessToken.new(client, @outlook_configuration.refresh_token)
+    token = OAuth2::AccessToken.new(client, @ticket_token.refresh_token)
     refreshed_token = token.refresh!
     {
       access_token: refreshed_token.token,
@@ -131,11 +134,12 @@ class OutlookMailService
     }
   rescue OAuth2::Error => e
     Rails.logger.error("Token refresh failed: #{e.message}")
+    @job.update!(sync_status: 3, message: e.message)
     nil
   end
 
   def oauth_client
-    @secret = RedmineMailProvider.find_by(provider: 'outlook')
+    @secret = MailTicketProvider.find_by(name: 'outlook')
     @oauth_client ||= OAuth2::Client.new(
       @secret.client_id,
       @secret.client_secret,

@@ -33,9 +33,9 @@ class SchedulerFileGenerator
     frequency = mailbox.frequency || '30.minutes'
     project_identifier = mailbox.project&.identifier || 'default_project'
     email = mailbox.email || 'default_email@example.com'
-
+    environment = Rails.env
     file.puts "every #{frequency} do"
-    file.puts "  rake \"microsoft_mail:fetch_and_create_issues project=#{project_identifier} email=#{email}\""
+    file.puts "  rake \"microsoft_mail:fetch_and_create_issues project=#{project_identifier} email=#{email}\", environment: \"#{environment}\""
     file.puts "end"
     file.puts
   end
