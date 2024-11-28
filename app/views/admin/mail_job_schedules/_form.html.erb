@@ -16,7 +16,7 @@
           <%= f.fields_for :mail_ticket_token do |token_form| %>
             <p>
               <%= token_form.label :mail_ticket_provider_id, "Provider" %>
-              <%= token_form.select :mail_ticket_provider_id, options_from_collection_for_select(@providers, :id, :name), prompt: 'Choose a provider', required: true %>
+              <%= token_form.select :mail_ticket_provider_id, options_from_collection_for_select(@providers, :id, :name, token_form.object.mail_ticket_provider&.id), prompt: 'Choose a provider', required: true %>
             </p>
           <% end %>
           <p>

@@ -17,7 +17,7 @@
         <tbody>
           <% @mail_providers.each do | mail_provider | %>
             <tr>
-              <td><%= mail_provider.name %></td>
+              <td><%= mail_provider.name.capitalize %></td>
               <td><%= mail_provider.active  ? 'Active' : 'Inactive' %></td>
               <td>
                 <%= link_to 'Edit', edit_admin_mail_ticket_provider_path(mail_provider) %> |

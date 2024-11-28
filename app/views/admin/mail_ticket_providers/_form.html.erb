@@ -15,7 +15,7 @@
         <div class="splitcontentleft">
           <p>
             <%= f.label :name %>
-            <%= f.select :name, options_for_select([['Outlook', 'outlook'], ['Gmail', 'gmail']]), { prompt: 'Choose an email provider'} , { id:'provider' }%>
+            <%= f.select :name, options_for_select([['Outlook', 'outlook'], ['Gmail', 'gmail']], f.object.name), { prompt: 'Choose an email provider'} , { id:'provider' }%>
           </p>
           <p>
             <%= f.label :client_id %>
@@ -45,14 +45,25 @@
 <%= link_to "back", admin_mail_ticket_providers_path %>
 
 <script>
-  $("#provider").on('change', () => {
-    var selectValue = $("#provider").val();
-    var tenantIdWrapper = "tenant_id_wrapper"
+  var tenantIdWrapper = "tenant_id_wrapper";
+  var providerId = "provider";
+
+  function hideTenantField() {
+    var selectValue = $("#"+providerId).val();
     if(selectValue === 'gmail') {
       $("#"+tenantIdWrapper).addClass('hidden')
-      console.log("sdfsdfds")
     } else {
       $("#"+tenantIdWrapper).removeClass('hidden')
     }
+  }
+
+  $("#provider").on('change', () => {
+    hideTenantField()
   })
+
+  $(document).ready(function(){
+    hideTenantField()
+  })
+
+  
 </script>
