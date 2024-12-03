@@ -26,8 +26,8 @@ class EmailService
     return unless token_expired?
 
     Rails.logger.error('Access token expired, refreshing...')
-    if (token_data = refresh_access_token)
-      update_outlook_configuration(token_data)
+    if (response = refresh_access_token)
+      @job.mail_ticket_token.update!(access_token: response[:access_token], expires_at: response[:expires_at], refresh_token: response[:refresh_token])
     else
       handle_token_refresh_failure
     end
@@ -44,7 +44,6 @@ class EmailService
     return unless response
 
     @access_token = response[:access_token]
-    @job.update!(access_token: @access_token, expires_at: response[:expires_at], refresh_token: response[:refresh_token])
     response
   end
 
