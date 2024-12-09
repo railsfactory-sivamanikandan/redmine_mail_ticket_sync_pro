@@ -4,5 +4,7 @@ class MailTicketProvider < ApplicationRecord
 
   default_scope -> { where(active: true) }
   delegate :provider_name, to: :mail_ticket_tokens
-  validates :client_id, :client_secret, :tenant_id, :callback_url, :name, presence: true
+  validates :name, presence: true, uniqueness: true
+  validates :client_id, :client_secret, :callback_url, presence: true
+  validates :tenant_id, presence: true, if: -> { name == 'outlook' }
 end

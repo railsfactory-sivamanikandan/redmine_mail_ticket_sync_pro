@@ -15,7 +15,7 @@
         <div class="splitcontentleft">
           <p>
             <%= f.label :name %>
-            <%= f.select :name, options_for_select([['Outlook', 'outlook']]), prompt: 'Choose an email provider' %>
+            <%= f.select :name, options_for_select([['Outlook', 'outlook'], ['Gmail', 'gmail']], f.object.name), { prompt: 'Choose an email provider'} , { id:'provider' }%>
           </p>
           <p>
             <%= f.label :client_id %>
@@ -27,7 +27,7 @@
             <%= f.text_field :client_secret, size: 100 %>
           </p>
 
-          <p>
+          <p id='tenant_id_wrapper'>
             <%= f.label :tenant_id %>
             <%= f.text_field :tenant_id, size: 100 %>
           </p>
@@ -43,3 +43,27 @@
   <%= f.submit mail_provider.new_record? ? 'Create' : 'Update', class: 'btn btn-primary' %>
 <% end %>
 <%= link_to "back", admin_mail_ticket_providers_path %>
+
+<script>
+  var tenantIdWrapper = "tenant_id_wrapper";
+  var providerId = "provider";
+
+  function hideTenantField() {
+    var selectValue = $("#"+providerId).val();
+    if(selectValue === 'gmail') {
+      $("#"+tenantIdWrapper).addClass('hidden')
+    } else {
+      $("#"+tenantIdWrapper).removeClass('hidden')
+    }
+  }
+
+  $("#provider").on('change', () => {
+    hideTenantField()
+  })
+
+  $(document).ready(function(){
+    hideTenantField()
+  })
+
+  
+</script>

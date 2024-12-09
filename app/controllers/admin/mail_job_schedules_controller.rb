@@ -61,30 +61,29 @@ class Admin::MailJobSchedulesController < ApplicationController
   end
 
   def login
-    service = OutlookOauthService.new
-    redirect_to service.authorization_url('user.read mail.readwrite offline_access')
+    url = OauthService.get_authorize_url_for_provider(params[:provider])
+    redirect_to url
   end
 
   def callback
-    service = OutlookOauthService.new
-    token_data = service.fetch_token(params[:code])
+    token_data = OauthService.get_access_token_for_provider(params[:provider], params[:code])
     if token_data
-      update_outlook_configuration(token_data)
+      update_provider_configuration(token_data)
       flash[:notice] = "Logged in successfully! Email: #{token_data[:email]}"
     else
       flash[:error] = l(:error_oauth_failed)
     end
-    redirect_to admin_mail_job_schedules_path, notice: 'Mail provider successfully authenticated.'
+    redirect_to admin_mail_job_schedules_path
 	end
 
   def start_mail_sync
     if @mail_job_schedule.is_account_verified?
       @mail_job_schedule.update(sync_status: 1)
       args = {tracker: @mail_job_schedule.tracker_id, priority: @mail_job_schedule.priority_id, assigned_to: @mail_job_schedule.assigned_to_id}
-      mail_service = OutlookMailService.new(@mail_job_schedule, args)
-      mail_service.fetch_and_create_issues
+      service = EmailService.new(@mail_job_schedule, args)
+      service.fetch_and_create_issues
     end
-    redirect_to admin_mail_job_schedules_path, notice: 'Mail sync successfully.'
+    redirect_to admin_mail_job_schedules_path, notice: 'Mail sync successfully!'
   end
 
   private
@@ -98,19 +97,21 @@ class Admin::MailJobSchedulesController < ApplicationController
       :tracker_id, :priority_id, :frequency, mail_ticket_token_attributes: [:id, :mail_ticket_provider_id] )
   end
 
-  def update_outlook_configuration(token_data)
+  def update_provider_configuration(token_data)
     job = MailJobSchedule.find_by(email: token_data[:email])
-    job.update(
-      sync_status: 0, 
-      last_sync_email_count: 0, 
-      inbox_last_sync_at: nil
-    )
-    mail_ticket_token = job.mail_ticket_token
-    mail_ticket_token.update(
-      access_token: token_data[:access_token],
-      refresh_access_token: token_data[:refresh_token],
-      expires_at: token_data[:expires_at],
-      status: 1,
-    )
+    if job
+      job.update(
+        sync_status: 0,
+        last_sync_email_count: 0,
+        inbox_last_sync_at: nil
+      )
+      mail_ticket_token = job.mail_ticket_token
+      mail_ticket_token.update(
+        access_token: token_data[:access_token],
+        refresh_access_token: token_data[:refresh_token],
+        expires_at: token_data[:expires_at],
+        status: 1,
+      )
+    end
   end
 end

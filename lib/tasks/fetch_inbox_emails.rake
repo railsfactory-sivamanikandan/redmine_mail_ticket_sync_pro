@@ -1,5 +1,5 @@
-namespace :microsoft_mail do
-  desc "Fetch unread emails from Outlook"
+namespace :emails do
+  desc "Fetch unread emails from Gmail and Outlook and process them"
   task :fetch_and_create_issues => :environment do
     project = ENV['project']
     email = ENV['email']
@@ -12,7 +12,7 @@ namespace :microsoft_mail do
       mailbox = MailJobSchedule.find_by(project_id: project.id, email: email)
       if mailbox && mailbox.active
         args = {tracker: mailbox.tracker_id, priority: mailbox.priority_id, assigned_to: mailbox.assigned_to_id}
-        mail_service = OutlookMailService.new(mailbox, args)
+        mail_service = EmailService.new(mailbox, args)
         mail_service.fetch_and_create_issues
       end
     end
