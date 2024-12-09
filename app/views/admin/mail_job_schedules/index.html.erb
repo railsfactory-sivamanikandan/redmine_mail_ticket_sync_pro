@@ -32,7 +32,7 @@
               <td>
                 <%= link_to 'Edit', edit_admin_mail_job_schedule_path(job), class: "icon icon-edit" %> |
                 <%= link_to 'Remove', admin_mail_job_schedule_path(job), method: :delete, class: "icon icon-del" %> |
-                <%= link_to job.is_account_verified? ? "Re-Authenticate" : "Authenticate", provider_login_path(job.provider_name.downcase), method: :post, class: "icon icon-ok" %>
+                <%= link_to job.is_account_verified? ? "Re-Authenticate" : "Authenticate", provider_login_path(job.provider_name.downcase), method: :post, class: "icon icon-ok" if job.provider_name%>
                 <% if job.is_account_verified? %>
                   |
                   <%= link_to "Sync Mail", start_mail_sync_path(job), class: "icon icon-roles", title: 'Manual Sync' %>
