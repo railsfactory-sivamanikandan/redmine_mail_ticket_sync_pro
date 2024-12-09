@@ -8,7 +8,7 @@ class SchedulerFileGenerator
 
   # Generate the schedule file
   def generate_schedule
-    jobs = MailJobSchedule.all
+    jobs = MailJobSchedule.joins(:mail_ticket_token).where.not(mail_ticket_tokens: {access_token: [nil, ""]})
     File.open(SCHEDULE_FILE_PATH, 'w') do |file|
       write_file_header(file)
       jobs.each do |mailbox|
