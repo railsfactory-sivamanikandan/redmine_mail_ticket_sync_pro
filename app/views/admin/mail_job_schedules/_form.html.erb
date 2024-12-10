@@ -21,12 +21,12 @@
           <% end %>
           <p>
             <%= f.label :project_id %>
-            <%= f.select :project_id, options_from_collection_for_select(@projects, :id, :name), prompt: 'Choose a project', required: true %>
+            <%= f.select :project_id, options_from_collection_for_select(@projects, :id, :name, f.object.project_id), prompt: 'Choose a project', required: true %>
           </p>
 
           <p>
             <%= f.label :assigned_to_id %>
-            <%= f.select :assigned_to_id, options_from_collection_for_select(@users, :id, :name), prompt: 'Choose a assignee', required: true %>
+            <%= f.select :assigned_to_id, options_from_collection_for_select(@users, :id, :name, f.object.assigned_to_id), prompt: 'Choose a assignee', required: true %>
           </p>
 
           <p>
@@ -41,12 +41,12 @@
           </p>
           <p>
             <%= f.label :tracker_id %>
-            <%= f.select :tracker_id, options_from_collection_for_select(@trackers, :id, :name), prompt: 'Choose a tracker', required: true %>
+            <%= f.select :tracker_id, options_from_collection_for_select(@trackers, :id, :name, f.object.tracker_id), prompt: 'Choose a tracker', required: true %>
           </p>
 
           <p>
             <%= f.label :priority_id %>
-            <%= f.select :priority_id, options_from_collection_for_select(@priorities, :id, :name), prompt: 'Choose a priority', required: true %>
+            <%= f.select :priority_id, options_from_collection_for_select(@priorities, :id, :name, f.object.priority_id), prompt: 'Choose a priority', required: true %>
           </p>
         </div>
 
