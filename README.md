@@ -45,6 +45,8 @@ git submodule update
 ```bash
 bundle install
 ```
+### Clone as full code
+To include this plugin directly with in your Redmine project:
 
 1. Clone the repository into your Redmine plugins folder:
 
@@ -58,13 +60,15 @@ git clone https://github.com/railsfactory-sivamanikandan/redmine_mail_ticket_syn
 bundle install
 ```
 
-3. Run migrations:
+### Other configurations
+
+1. Run migrations:
 
 ```bash
 rake redmine:plugins:migrate NAME=mail_ticket_sync_pro RAILS_ENV=production
 ```
 
-4. Set Up Active Record Encryption (Use Rails Encrypted Configuration)
+2. Set Up Active Record Encryption (Use Rails Encrypted Configuration)
 Rails provides `config/credentials.yml.enc` for securely storing sensitive data. To store encryption keys:
 
 1. Open credentials.yml.enc:
@@ -88,7 +92,7 @@ config.active_record.encryption.deterministic_key = Rails.application.credential
 config.active_record.encryption.key_derivation_salt = Rails.application.credentials.active_record_encryption[:key_derivation_salt]
 ```
 
-5. Restart Redmine.
+3. Restart Redmine.
 
 ## Configuration
 
