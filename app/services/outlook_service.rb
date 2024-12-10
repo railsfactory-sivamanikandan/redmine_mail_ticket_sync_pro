@@ -98,10 +98,14 @@ class OutlookService
   # Parse email details
   def parse_emails(emails)
     emails.map do |email|
+      name = email.dig('from', 'emailAddress', 'name')&.downcase
+      first_name = name ? name.split(' ')&.first : nil
+      last_name = name ? name.split(' ')&.last : nil
       {
         subject: email['subject'],
         from: email.dig('from', 'emailAddress', 'address'),
-        name: email.dig('from', 'emailAddress', 'name')&.downcase,
+        first_name: first_name,
+        last_name: last_name,
         received_at: email['receivedDateTime'],
         body: email['bodyPreview'],
         id: email['id']

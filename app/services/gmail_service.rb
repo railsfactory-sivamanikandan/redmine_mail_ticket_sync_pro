@@ -97,10 +97,12 @@ class GmailService
     headers = message['payload']['headers']
     from_dtl = fetch_header(headers, 'From')
     name = from_dtl[/^(.*)<.*>$/, 1]&.strip&.downcase || nil
-    name = name ? name.split(' ')&.first : nil
+    first_name = name ? name.split(' ')&.first : nil
+    last_name = name ? name.split(' ')&.last : nil
     {
       from: from_dtl[/<(.*)>$/, 1]&.strip || from_dtl,
-      name: name,
+      first_name: first_name,
+      last_name: last_name,
       received_at: fetch_header(headers, 'Date'),
       subject: fetch_header(headers, 'Subject'),
       body: message['snippet'],

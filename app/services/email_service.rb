@@ -87,7 +87,9 @@ class EmailService
   end
 
   def issue_params(email)
-    author_id = email[:name] ? (User.where('LOWER(firstname) = ?', email[:name]).last.try(:id) || 1) : 1
+    author_id = find_or_create_user_from_attributes( email[:from],email[:first_name], email[:last_name]).try(:id) || 1
+    start_date ||= User.current.today if Setting.default_issue_start_date_to_creation_date?
+
     {
       subject: email[:subject],
       description: email[:body],
@@ -95,8 +97,31 @@ class EmailService
       author_id: author_id,
       tracker_id: @tracker,
       priority_id: @priority,
-      assigned_to_id: @assigned_to
+      assigned_to_id: @assigned_to,
+      start_date: start_date,
     }
+  end
+
+  def find_or_create_user_from_attributes(email_address, firstname=nil, lastname=nil)
+    user = User.find_by_mail(email_address)
+    unless user
+      user = User.new
+      user.mail = email_address
+      user.login = email_address[0, User::LOGIN_LENGTH_LIMIT]
+      user.firstname = (firstname.presence || "-")[0, 30]
+      user.lastname = (lastname.presence || "-")[0, 30]
+      user.language = Setting.default_language
+      user.generate_password = true
+      user.mail_notification = 'none'
+      unless user.valid?
+        user.login = "user#{Redmine::Utils.random_hex(6)}" if user.errors[:login].present?
+        user.firstname = "-" if user.errors[:firstname].present?
+        user.lastname = "-" if user.errors[:lastname].present?
+      end
+      user.save! if user.valid?
+      log_error(user.errors.full_messages) unless user.valid?
+    end
+    user
   end
 
   def mark_email_as_read(email_id)
