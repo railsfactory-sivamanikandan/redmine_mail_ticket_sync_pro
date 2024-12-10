@@ -1,0 +1,44 @@
+<div id="content">
+  <div class="contextual">
+    <%= link_to 'New', new_admin_mail_job_schedule_path, class: 'icon icon-add' %> |
+    <%= link_to 'Edit', edit_admin_mail_job_schedule_path(@mail_job_schedule), class: 'icon icon-edit' %> |
+    <%= link_to "back", admin_mail_job_schedules_path, class: 'icon icon-link' %>
+  </div>
+
+    <div id="configure-data">
+      <table class="list">
+        <tr>
+          <td>Provider</td>
+          <td><%= @mail_job_schedule.provider_name %></td>
+        </tr>
+        <tr>
+          <td>Mail</td>
+          <td><%= @mail_job_schedule.email %></td>
+        </tr>
+        <tr>
+          <td>Project</td>
+          <td><%= @mail_job_schedule.project.name %></td>
+        </tr>
+        <tr>
+          <td>Status</td>
+          <td><%= @mail_job_schedule.sync_status.humanize %></td>
+        </tr>
+        <tr>
+          <td>Frequency</td>
+          <td><%= @mail_job_schedule.frequency.gsub!('.', ' ') %> once</td>
+        </tr>
+        <tr>
+          <td>Inbox Last Sync at</td>
+          <td><%= @mail_job_schedule.inbox_last_sync_at ? time_ago_in_words(@mail_job_schedule.inbox_last_sync_at) : '-' %> </td>
+        </tr>
+        <tr>
+          <td> Last Sync Mail Count </td>
+          <td><%= @mail_job_schedule.last_sync_email_count || 0 %> </td>
+        </tr>
+        <tr>
+          <td> Error </td>
+          <td><%= @mail_job_schedule.message || 'n/a' %> </td>
+        </tr>
+      </table>
+    </div>
+</div>

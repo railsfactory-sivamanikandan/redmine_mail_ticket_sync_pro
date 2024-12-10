@@ -37,6 +37,8 @@
                   |
                   <%= link_to "Sync Mail", start_mail_sync_path(job), class: "icon icon-roles", title: 'Manual Sync' %>
                 <% end %>
+                |
+                <%= link_to 'View', admin_mail_job_schedule_path(job), class: "icon icon-folder" %>
               </td>
             </tr>
           <% end %>

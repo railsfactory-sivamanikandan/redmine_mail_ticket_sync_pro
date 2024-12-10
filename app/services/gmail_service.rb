@@ -95,8 +95,12 @@ class GmailService
 
   def extract_message_details(message, message_id)
     headers = message['payload']['headers']
+    from_dtl = fetch_header(headers, 'From')
+    name = from_dtl[/^(.*)<.*>$/, 1]&.strip&.downcase || nil
+    name = name ? name.split(' ')&.first : nil
     {
-      from: fetch_header(headers, 'From'),
+      from: from_dtl[/<(.*)>$/, 1]&.strip || from_dtl,
+      name: name,
       received_at: fetch_header(headers, 'Date'),
       subject: fetch_header(headers, 'Subject'),
       body: message['snippet'],

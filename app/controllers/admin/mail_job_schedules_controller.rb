@@ -1,5 +1,5 @@
 class Admin::MailJobSchedulesController < ApplicationController
-  before_action :find_mail_job_schedule, only: %i[edit update destroy, start_mail_sync]
+  before_action :find_mail_job_schedule, only: %i[edit update show destroy start_mail_sync]
   before_action :require_admin
   layout 'admin'
 
@@ -52,6 +52,9 @@ class Admin::MailJobSchedulesController < ApplicationController
       @providers = MailTicketProvider.all
       render :edit
     end
+  end
+
+  def show
   end
 
   def destroy

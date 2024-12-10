@@ -50,7 +50,7 @@ class OutlookService
     handle_response(response) do |body|
       {
         access_token: body['access_token'],
-        expires_in: body['expires_in'],
+        expires_in: Time.now + body['expires_in'].to_i,
         refresh_token: body['refresh_token']
       }
     end
@@ -101,6 +101,7 @@ class OutlookService
       {
         subject: email['subject'],
         from: email.dig('from', 'emailAddress', 'address'),
+        name: email.dig('from', 'emailAddress', 'name')&.downcase,
         received_at: email['receivedDateTime'],
         body: email['bodyPreview'],
         id: email['id']
