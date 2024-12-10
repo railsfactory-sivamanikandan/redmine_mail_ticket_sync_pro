@@ -28,7 +28,7 @@ class OutlookService
     uri = "#{GRAPH_API_BASE}/me/messages?$filter=isRead eq false"
     response = make_request(uri, :get, access_token)
     handle_response(response) do |body|
-      parse_emails(body['value'])
+      parse_emails(body['value'], access_token)
     end
   end
 
@@ -96,11 +96,14 @@ class OutlookService
   end
 
   # Parse email details
-  def parse_emails(emails)
+  def parse_emails(emails, access_token)
     emails.map do |email|
       name = email.dig('from', 'emailAddress', 'name')&.downcase
       first_name = name ? name.split(' ')&.first : nil
       last_name = name ? name.split(' ')&.last : nil
+
+      # Fetch the email attachments
+      attachments = fetch_attachments(email['id'], access_token)
       {
         subject: email['subject'],
         from: email.dig('from', 'emailAddress', 'address'),
@@ -108,7 +111,29 @@ class OutlookService
         last_name: last_name,
         received_at: email['receivedDateTime'],
         body: email['bodyPreview'],
-        id: email['id']
+        id: email['id'],
+        attachments: attachments
+      }
+    end
+  end
+
+  # Fetch email attachments
+  def fetch_attachments(message_id, access_token)
+    uri = "#{GRAPH_API_BASE}/me/messages/#{message_id}/attachments"
+    response = make_request(uri, :get, access_token)
+    handle_response(response) do |body|
+      parse_attachments(body['value'])
+    end
+  end
+
+  # Parse attachment details
+  def parse_attachments(attachments)
+    attachments.map do |attachment|
+      {
+        id: attachment['id'],
+        name: attachment['name'],
+        content_type: attachment['contentType'],
+        content: attachment['contentBytes'] # This is base64-encoded content
       }
     end
   end

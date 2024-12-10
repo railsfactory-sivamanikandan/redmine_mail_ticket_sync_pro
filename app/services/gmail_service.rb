@@ -66,7 +66,37 @@ class GmailService
   def get_message_details(message_id, access_token)
     response = self.class.get("#{GMAIL_API_BASE}/messages/#{message_id}", headers: authorization_header(access_token))
     handle_response(response) do |parsed_response|
-      extract_message_details(parsed_response, message_id)
+      message_details = extract_message_details(parsed_response, message_id)
+      attachments = parse_attachments(parsed_response, access_token)
+      message_details.merge(attachments: attachments)
+    end
+  end
+
+  def parse_attachments(message, access_token)
+    attachments = []
+    parts = message['payload']['parts'] || []
+
+    parts.each do |part|
+      if part['filename'] && part['body'] && part['body']['attachmentId']
+        attachment_id = part['body']['attachmentId']
+        attachment = fetch_attachments(attachment_id, access_token)
+        attachments << {
+          id: attachment_id,
+          name: part['filename'],
+          content_type: part['mimeType'],
+          content: attachment
+        }
+      end
+    end
+
+    attachments
+  end
+
+  def fetch_attachments(attachment_id, access_token)
+    url = "#{GMAIL_API_BASE}/messages/#{attachment_id}/attachments/#{attachment_id}"
+    response = self.class.get(url, headers: authorization_header(access_token))
+    handle_response(response) do |parsed_response|
+      parsed_response['data']
     end
   end
 

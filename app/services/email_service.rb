@@ -75,9 +75,11 @@ class EmailService
   end
 
   def create_issue(email)
-    issue = @project.issues.new(issue_params(email))
+    author = find_or_create_user_from_attributes( email[:from],email[:first_name], email[:last_name])
+    issue = @project.issues.new(issue_params(email, author))
 
     if issue.save
+      add_attachments(email, issue, author)
       Rails.logger.info("Issue created for email: #{email[:subject]}")
       mark_email_as_read(email[:id])
       { created: true }
@@ -86,8 +88,8 @@ class EmailService
     end
   end
 
-  def issue_params(email)
-    author_id = find_or_create_user_from_attributes( email[:from],email[:first_name], email[:last_name]).try(:id) || 1
+  def issue_params(email, author)
+    author_id = author.try(:id) || 1
     start_date ||= User.current.today if Setting.default_issue_start_date_to_creation_date?
 
     {
@@ -100,6 +102,21 @@ class EmailService
       assigned_to_id: @assigned_to,
       start_date: start_date,
     }
+  end
+
+  def add_attachments(email, issue, user)
+    if email[:attachments] && email[:attachments].any?
+      email[:attachments].each do |attachment|
+        attachment_content = Base64.decode64(attachment[:content])
+        issue.attachments << Attachment.create(
+          container: issue,
+          file: attachment_content,
+          filename: attachment[:name],
+          author: user,
+          content_type: attachment[:content_type]
+        )
+      end
+    end
   end
 
   def find_or_create_user_from_attributes(email_address, firstname=nil, lastname=nil)
