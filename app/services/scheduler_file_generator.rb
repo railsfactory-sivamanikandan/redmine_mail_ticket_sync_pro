@@ -34,7 +34,9 @@ class SchedulerFileGenerator
     project_identifier = mailbox.project&.identifier || 'default_project'
     email = mailbox.email || 'default_email@example.com'
     environment = Rails.env
+    log_file = "/app/log/#{project_identifier}_#{email.parameterize}.log"
     file.puts "every #{frequency} do"
+    file.puts "  set :output, \"#{log_file}\""
     file.puts "  rake \"emails:fetch_and_create_issues project=#{project_identifier} email=#{email}\", environment: \"#{environment}\""
     file.puts "end"
     file.puts
