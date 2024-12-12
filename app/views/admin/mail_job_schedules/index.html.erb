@@ -32,13 +32,15 @@
               <td><%= job.inbox_last_sync_at ? time_ago_in_words(job.inbox_last_sync_at) : '-' %> </td>
               <td><%= job.last_sync_email_count || 0 %> </td>
               <td>
-                <%= link_to 'Edit', edit_admin_mail_job_schedule_path(job), class: "icon icon-edit" %> |
-                <%= link_to 'Delete', admin_mail_job_schedule_path(job), method: :delete, class: "icon icon-del" %> |
-                <%= link_to job.is_account_verified? ? "Re-Authenticate" : "Authenticate", provider_login_path(job.provider_name.downcase), method: :post, class: "icon icon-ok" if job.provider_name%>
-                <% if job.is_account_verified? %>
-                  |
-                  <%= link_to "Sync", start_mail_sync_path(job), class: "icon icon-roles", title: 'Manual Sync' %>
-                <% end %>
+                <div style="display: flex;">
+                  <%= link_to 'Edit', edit_admin_mail_job_schedule_path(job), class: "icon icon-edit" %> |
+                  <%= link_to 'Delete', admin_mail_job_schedule_path(job), method: :delete, class: "icon icon-del" %> |
+                  <%= link_to job.is_account_verified? ? "Re-Authenticate" : "Authenticate", provider_login_path(job.provider_name.downcase), method: :post, class: "icon icon-ok" if job.provider_name%>
+                  <% if job.is_account_verified? %>
+                    |
+                    <%= link_to "Sync", start_mail_sync_path(job), class: "icon icon-roles", title: 'Manual Sync' %>
+                  <% end %>
+                </div>
               </td>
             </tr>
           <% end %>

@@ -18,7 +18,6 @@ class EmailService
     success_count = 0
     errors = []
     grouped_emails = group_emails_by_parent(emails)
-
     grouped_emails.each do |email|
       create_response = create_issue_or_add_comments(email)
       success_count += 1 if create_response[:created]
@@ -229,7 +228,7 @@ class EmailService
     end
 
     email[:children].each do |child_email|
-      add_comments_for_issue(child_email, parent_issue, user)
+      add_comments_for_issue(child_email, parent_issue, user, true)
       mark_email_as_read(child_email[:id])
     end
   end
@@ -283,11 +282,13 @@ class EmailService
     grouped_emails = emails.group_by { |email| email[:parent_id] }
     top_level_emails = grouped_emails[nil] || []
 
-    top_level_emails.map do |parent_email|
+    result = top_level_emails.map do |parent_email|
       children = grouped_emails[parent_email[:id]] || []
-      parent_email.merge(children: children)
-    end.concat(
-      emails.select { |email| !grouped_emails[email[:parent_id]] }.map { |email| email.merge(children: []) }
-    )
+      parent_email.merge(children: children.map { |child| child.merge(children: []) })
+    end
+    ungrouped_emails = emails.reject { |email| grouped_emails[email[:parent_id]] }
+    result.concat(ungrouped_emails.map { |email| email.merge(children: []) })
+
+    result
   end
 end
