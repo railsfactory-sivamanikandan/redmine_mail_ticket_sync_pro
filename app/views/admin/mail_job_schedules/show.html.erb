@@ -2,7 +2,10 @@
   <div class="contextual">
     <%= link_to 'New', new_admin_mail_job_schedule_path, class: 'icon icon-add' %> |
     <%= link_to 'Edit', edit_admin_mail_job_schedule_path(@mail_job_schedule), class: 'icon icon-edit' %> |
-    <%= link_to "back", admin_mail_job_schedules_path, class: 'icon icon-link' %>
+    <% if @mail_job_schedule.is_account_verified? %>
+      <%= link_to "Sync", start_mail_sync_path(@mail_job_schedule), class: "icon icon-roles", title: 'Manual Sync' %> |
+    <% end %>
+    <%= link_to "<< back", admin_mail_job_schedules_path %>
   </div>
 
     <div id="configure-data">

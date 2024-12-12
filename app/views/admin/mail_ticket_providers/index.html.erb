@@ -5,7 +5,7 @@
 
   <% if @mail_providers.any? %>
     <div id="configure-data">
-      <h3>Mail Configuration</h3>
+      <h3>Mail Providers</h3>
       <table class="list">
         <thead>
           <tr>
@@ -20,8 +20,8 @@
               <td><%= mail_provider.name.capitalize %></td>
               <td><%= mail_provider.active  ? 'Active' : 'Inactive' %></td>
               <td>
-                <%= link_to 'Edit', edit_admin_mail_ticket_provider_path(mail_provider) %> |
-                <%= link_to 'Remove', admin_mail_ticket_provider_path(mail_provider), method: :delete %> 
+                <%= link_to 'Edit', edit_admin_mail_ticket_provider_path(mail_provider), class: "icon icon-edit" %> |
+                <%= link_to 'Delete', admin_mail_ticket_provider_path(mail_provider), method: :delete, class: "icon icon-del"  %>
               </td>
             </tr>
           <% end %>

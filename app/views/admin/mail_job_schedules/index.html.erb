@@ -9,19 +9,21 @@
       <table class="list">
         <thead>
           <tr>
+            <th>#</th>
             <th>Provider</th>
             <th>Mail</th>
             <th>Project</th>
             <th>Status</th>
             <th>Frequency</th>
-            <th>Inbox Last Sync at</th>
-            <th> Last Sync Mail Count </th>
+            <th>Last Sync at</th>
+            <th>Last Sync Count</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           <% @jobs.each do | job | %>
             <tr>
+              <td><%= link_to job.id, admin_mail_job_schedule_path(job) %></td>
               <td><%= job.provider_name %></td>
               <td><%= job.email %></td>
               <td><%= job.project.name %></td>
@@ -31,14 +33,12 @@
               <td><%= job.last_sync_email_count || 0 %> </td>
               <td>
                 <%= link_to 'Edit', edit_admin_mail_job_schedule_path(job), class: "icon icon-edit" %> |
-                <%= link_to 'Remove', admin_mail_job_schedule_path(job), method: :delete, class: "icon icon-del" %> |
+                <%= link_to 'Delete', admin_mail_job_schedule_path(job), method: :delete, class: "icon icon-del" %> |
                 <%= link_to job.is_account_verified? ? "Re-Authenticate" : "Authenticate", provider_login_path(job.provider_name.downcase), method: :post, class: "icon icon-ok" if job.provider_name%>
                 <% if job.is_account_verified? %>
                   |
-                  <%= link_to "Sync Mail", start_mail_sync_path(job), class: "icon icon-roles", title: 'Manual Sync' %>
+                  <%= link_to "Sync", start_mail_sync_path(job), class: "icon icon-roles", title: 'Manual Sync' %>
                 <% end %>
-                |
-                <%= link_to 'View', admin_mail_job_schedule_path(job), class: "icon icon-folder" %>
               </td>
             </tr>
           <% end %>
