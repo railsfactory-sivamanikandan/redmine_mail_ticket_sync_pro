@@ -76,7 +76,7 @@ class EmailService
 
   def create_issue_or_add_comments(email)
     author = find_or_create_user_from_attributes(email[:from], email[:first_name], email[:last_name])
-    existing_issue = Issue.find_by(email_message_id: email[:conversation_id])
+    existing_issue = find_existing_issue(email)
 
     if existing_issue
       add_comments_for_issue(email, existing_issue, author, true)
@@ -85,6 +85,14 @@ class EmailService
     else
       create_issue(email, author)
     end
+  end
+
+  def find_existing_issue(email)
+    ticket_info = email[:subject].match(/\[.*? #(\d+)\](?!\S)/)
+    existing_issue = ticket_info ? Issue.find_by(id: ticket_info[1]) : nil
+    existing_issue ||= Issue.find_by(email_message_id: email[:conversation_id])
+
+    existing_issue
   end
 
   def create_issue(email, author)
