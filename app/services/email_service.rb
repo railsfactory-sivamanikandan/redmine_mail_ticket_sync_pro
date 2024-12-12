@@ -42,7 +42,7 @@ class EmailService
   end
 
   def token_expired?
-    @ticket_token.expires_at < Time.now
+    @ticket_token.expires_at < Time.current
   end
 
   def refresh_access_token
@@ -51,10 +51,10 @@ class EmailService
   end
 
   def update_job_with_new_token(response)
+    expires_at = @provider == 'outlook' ? response[:expires_in] : response[:expires_at]
     @job.mail_ticket_token.update!(
       access_token: response[:access_token],
-      expires_at: Time.now + response['expires_in'].to_i,
-      refresh_token: response[:refresh_token]
+      expires_at: expires_at,
     )
   end
 
@@ -77,6 +77,12 @@ class EmailService
   def create_issue(email)
     author = find_or_create_user_from_attributes( email[:from],email[:first_name], email[:last_name])
     issue = @project.issues.new(issue_params(email, author))
+
+    available_custom_fields = IssueCustomField.where(
+      id: @job.tracker.custom_field_ids & @project.all_issue_custom_fields.pluck(:id)
+    )
+
+    issue.safe_attributes = {custom_field_values: build_custom_field_parameters(available_custom_fields)}
 
     if issue.save
       add_attachments(email, issue, author)
@@ -102,6 +108,59 @@ class EmailService
       assigned_to_id: @assigned_to,
       start_date: start_date,
     }
+  end
+
+  def build_custom_field_parameters(available_custom_fields)
+    custom_field_values = {}
+    available_custom_fields.each do |field|
+      value = field.default_value.presence
+
+      if field.field_format == 'list' && field.possible_values.present?
+        value ||= field.possible_values.last
+      end
+
+      if field.field_format == 'date'
+        value ||= Date.today.to_s
+      end
+
+      if field.field_format == 'int'
+        value = (value.presence || 0).to_i
+        if field.min_length && value.to_s.length < field.min_length
+          value = value.to_s.rjust(field.min_length, '1').to_i
+        end
+        if field.max_length && value.to_s.length > field.max_length
+          value = value.to_s[0...field.max_length].to_i
+        end
+      end
+
+      if field.field_format == 'float'
+        value = (value.presence || 0.0).to_f
+        if field.min_length
+          value = sprintf("%1#{field.min_length}f", value)
+        end
+        if field.max_length && value.to_s.length > field.max_length
+          value = value.to_s[0...field.max_length].to_f
+        end
+      end
+
+      if field.field_format == 'string'
+        value ||= "DefaultValue"
+        if field.min_length && value.to_s.length < field.min_length
+          value = value.to_s.ljust(field.min_length, '_')
+        end
+        if field.max_length && value.to_s.length > field.max_length
+          value = value.to_s[0...field.max_length]
+        end
+      end
+
+      if field.field_format == 'string' && field.regexp.present? && !Regexp.new(field.regexp).match?(value.to_s)
+        value = field.possible_values&.first || "DefaultValue"
+      end
+
+      custom_field_values[field.id.to_s] = value
+    end
+
+    custom_field_values
   end
 
   def add_attachments(email, issue, user)

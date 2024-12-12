@@ -37,7 +37,7 @@ class GmailService
         access_token: parsed_response['access_token'],
         refresh_token: parsed_response['refresh_token'],
         email: email,
-        expires_at: Time.now + parsed_response['expires_in'].to_i
+        expires_at: (Time.current + parsed_response['expires_in'].to_i)
       }
     end
   end
@@ -47,7 +47,7 @@ class GmailService
     handle_response(response) do |parsed_response|
       {
         access_token: parsed_response['access_token'],
-        expires_at: Time.now + parsed_response['expires_in'].to_i,
+        expires_at: (Time.current + parsed_response['expires_in'].to_i),
         refresh_token: parsed_response['refresh_token']
       }
     end

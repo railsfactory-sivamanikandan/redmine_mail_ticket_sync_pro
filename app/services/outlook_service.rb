@@ -50,7 +50,7 @@ class OutlookService
     handle_response(response) do |body|
       {
         access_token: body['access_token'],
-        expires_in: Time.now + body['expires_in'].to_i,
+        expires_in: Time.current + body['expires_in'].to_i,
         refresh_token: body['refresh_token']
       }
     end
@@ -90,7 +90,7 @@ class OutlookService
     {
       access_token: token.token,
       refresh_token: token.refresh_token,
-      expires_at: Time.at(token.expires_at),
+      expires_at: Time.at(token.expires_at).in_time_zone,
       email: user_info['unique_name']
     }
   end
