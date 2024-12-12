@@ -86,7 +86,7 @@ class Admin::MailJobSchedulesController < ApplicationController
       service = EmailService.new(@mail_job_schedule, args)
       service.fetch_and_create_issues
     end
-    redirect_to admin_mail_job_schedules_path, notice: 'Mail sync successfully!'
+    redirect_to request.referer || admin_mail_job_schedules_path, notice: 'Mail sync successfully!'
   end
 
   private
