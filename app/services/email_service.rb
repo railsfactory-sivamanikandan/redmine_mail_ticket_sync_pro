@@ -17,9 +17,9 @@ class EmailService
 
     success_count = 0
     errors = []
-
+    emails = group_emails_by_parent(emails)
     emails.each do |email|
-      create_response = create_issue(email)
+      create_response = create_issue_or_add_comments(email)
       success_count += 1 if create_response[:created]
       errors << create_response[:error] unless create_response[:created]
     end
@@ -74,10 +74,20 @@ class EmailService
     end
   end
 
-  def create_issue(email)
-    author = find_or_create_user_from_attributes( email[:from],email[:first_name], email[:last_name])
-    issue = @project.issues.new(issue_params(email, author))
+  def create_issue_or_add_comments(email)
+    author = find_or_create_user_from_attributes(email[:from],email[:first_name], email[:last_name])
+    existing_issue = Issue.find_by(email_message_id: email[:conversation_id])
+    if existing_issue
+      add_comments_for_issue(email, existing_issue, author, true)
+      mark_email_as_read(email[:id])
+      { created: true }
+    else
+      create_issue(email, author)
+    end
+  end
 
+  def create_issue(email, author)
+    issue = @project.issues.new(issue_params(email, author))
     available_custom_fields = IssueCustomField.where(
       id: @job.tracker.custom_field_ids & @project.all_issue_custom_fields.pluck(:id)
     )
@@ -88,6 +98,7 @@ class EmailService
       add_attachments(email, issue, author)
       Rails.logger.info("Issue created for email: #{email[:subject]}")
       mark_email_as_read(email[:id])
+      add_comments_for_issue(email, issue, author) if email[:children].length > 0
       { created: true }
     else
       log_issue_creation_failure(email[:subject], issue)
@@ -107,6 +118,7 @@ class EmailService
       priority_id: @priority,
       assigned_to_id: @assigned_to,
       start_date: start_date,
+      email_message_id: email[:conversation_id],
     }
   end
 
@@ -200,6 +212,27 @@ class EmailService
     user
   end
 
+  def add_comments_for_issue(email, parent_issue, user, execute_parent = false)
+    issue = parent_issue
+    if issue
+      if execute_parent
+        return if Journal.exists?(journalized_type: "Issue", journalized_id: issue.id, notes: email[:id])
+        comment = "Reply to email: #{email[:subject]} - #{email[:body]}"
+        issue.reload
+        issue.notes = comment
+        issue.journals.create(user: user, notes: comment)
+        issue.save!
+      end
+      children = email[:children] || []
+      children.each do |child_email|
+        add_comments_for_issue(child_email, issue, user) # Recurse with the child and the current issue
+        mark_email_as_read(child_email[:id])
+      end
+    else
+      log_error("Issue for email #{email[:id]} not found")
+    end
+  end
+
   def mark_email_as_read(email_id)
     service.mark_as_read(email_id, @access_token) if email_id
   end
@@ -233,5 +266,17 @@ class EmailService
                  else
                    raise "Unsupported provider: #{@provider}"
                  end
+  end
+
+  def group_emails_by_parent(emails)
+    grouped_emails = emails.group_by { |email| email[:parent_id] }
+    top_level_emails = grouped_emails[nil] || []
+
+    top_level_emails.map do |parent_email|
+      children = grouped_emails[parent_email[:id]] || []
+      parent_email.merge(children: children)
+    end.concat(
+      emails.select { |email| !grouped_emails.key?(email[:id]) && email[:parent_id] }
+    )
   end
 end

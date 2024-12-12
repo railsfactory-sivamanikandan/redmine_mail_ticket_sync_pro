@@ -59,14 +59,14 @@ class GmailService
                               query: { q: 'is:unread' })
     handle_response(response) do |parsed_response|
       messages = parsed_response['messages'] || []
-      messages.map { |msg| get_message_details(msg['id'], access_token) }
+      messages.map { |msg| get_message_details(msg, access_token) }
     end
   end
 
-  def get_message_details(message_id, access_token)
-    response = self.class.get("#{GMAIL_API_BASE}/messages/#{message_id}", headers: authorization_header(access_token))
+  def get_message_details(msg, access_token)
+    response = self.class.get("#{GMAIL_API_BASE}/messages/#{msg['id']}", headers: authorization_header(access_token))
     handle_response(response) do |parsed_response|
-      message_details = extract_message_details(parsed_response, message_id)
+      message_details = extract_message_details(parsed_response, msg['id'], msg['threadId'])
       attachments = parse_attachments(parsed_response, access_token)
       message_details.merge(attachments: attachments)
     end
@@ -123,7 +123,7 @@ class GmailService
     handle_response(response) { |parsed_response| parsed_response['email'] }
   end
 
-  def extract_message_details(message, message_id)
+  def extract_message_details(message, message_id, thread_id)
     headers = message['payload']['headers']
     from_dtl = fetch_header(headers, 'From')
     name = from_dtl[/^(.*)<.*>$/, 1]&.strip&.downcase || nil
@@ -137,6 +137,9 @@ class GmailService
       subject: fetch_header(headers, 'Subject'),
       body: message['snippet'],
       id: message_id,
+      parent_id: thread_id == message_id ? nil : thread_id,
+      is_reply: fetch_header(headers, 'In-Reply-To').present?,
+      conversation_id: thread_id,
     }
   end
 

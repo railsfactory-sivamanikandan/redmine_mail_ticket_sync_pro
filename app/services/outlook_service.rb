@@ -28,7 +28,8 @@ class OutlookService
     uri = "#{GRAPH_API_BASE}/me/messages?$filter=isRead eq false"
     response = make_request(uri, :get, access_token)
     handle_response(response) do |body|
-      parse_emails(body['value'], access_token)
+      emails = body['value'].group_by { |email| email['conversationId'] }
+      parse_emails(emails, access_token)
     end
   end
 
@@ -97,24 +98,29 @@ class OutlookService
 
   # Parse email details
   def parse_emails(emails, access_token)
-    emails.map do |email|
-      name = email.dig('from', 'emailAddress', 'name')&.downcase
-      first_name = name ? name.split(' ')&.first : nil
-      last_name = name ? name.split(' ')&.last : nil
+    emails.map do |conversation_id, conversation_emails|
+      sorted_emails = conversation_emails.sort_by { |email| email['receivedDateTime'] }
+      sorted_emails.each_with_index.map do |email, index|
+        name = email.dig('from', 'emailAddress', 'name')&.downcase
+        first_name = name ? name.split(' ')&.first : nil
+        last_name = name ? name.split(' ')&.last : nil
 
-      # Fetch the email attachments
-      attachments = fetch_attachments(email['id'], access_token)
-      {
-        subject: email['subject'],
-        from: email.dig('from', 'emailAddress', 'address'),
-        first_name: first_name,
-        last_name: last_name,
-        received_at: email['receivedDateTime'],
-        body: email['bodyPreview'],
-        id: email['id'],
-        attachments: attachments
-      }
-    end
+        # Fetch the email attachments
+        attachments = fetch_attachments(email['id'], access_token)
+        {
+          subject: email['subject'],
+          from: email.dig('from', 'emailAddress', 'address'),
+          first_name: first_name,
+          last_name: last_name,
+          received_at: email['receivedDateTime'],
+          body: email['bodyPreview'],
+          id: email['id'],
+          parent_id: conversation_emails.length > 1 && index != 0 ? sorted_emails.first['id'] : nil,
+          attachments: attachments,
+          conversation_id: conversation_id,
+        }
+      end
+    end.flatten
   end
 
   # Fetch email attachments
