@@ -190,18 +190,29 @@ class EmailService
     value
   end
 
-  def add_attachments(email, issue, user)
+  def add_attachments(email, issue, user, journal_create = false)
     return unless email[:attachments]&.any?
 
     email[:attachments].each do |attachment|
       attachment_content = Base64.decode64(attachment[:content])
-      issue.attachments.create(
+      attachment_obj = issue.attachments.create(
         container: issue,
         file: attachment_content,
         filename: attachment[:name],
         author: user,
         content_type: attachment[:content_type]
       )
+
+      if journal_create
+        note = attachment[:name]
+        journal = issue.journals.create(user: user, notes: note)
+        JournalDetail.create(
+          journal_id: journal.id,
+          property: 'attachment',
+          prop_key: attachment_obj.id,
+          value: note
+        )
+      end
     end
   end
 
@@ -240,6 +251,7 @@ class EmailService
     issue.reload
     issue.notes = comment
     issue.journals.create(user: user, notes: comment)
+    add_attachments(email, issue, user, true)
     issue.save!
   end
 
