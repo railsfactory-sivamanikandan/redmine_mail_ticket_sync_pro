@@ -13,7 +13,7 @@ MailTicketSyncPro is a powerful Redmine plugin designed to seamlessly integrate 
 
 Supported OAuth providers:
 * Azure AD (https://azure.microsoft.com)
-* Google (https://google.com) (Under development)
+* Google (https://google.com)
 
 ## Installation
 
