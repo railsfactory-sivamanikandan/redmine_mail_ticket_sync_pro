@@ -12,7 +12,7 @@ MailTicketSyncPro is a powerful Redmine plugin designed to seamlessly integrate 
 - Admin menu with intuitive UI and sidebar integration.
 
 Supported OAuth providers:
-* Azure AD (https://azure.microsoft.com)
+* Outlook (Azure AD) (https://azure.microsoft.com)
 * Google (https://google.com)
 
 Configure OAuth callback url
@@ -138,6 +138,18 @@ rake test RAILS_ENV=test
 
 - A scheduler file (config/schedule.rb) is auto-generated based on job schedules.
 - Uses the whenever gem to manage crontab entries.
+
+## Here is a screenshot of the plugin:
+
+![Mail Providers & Email Sync Jobs menu](images/menu-screenshot.png)
+
+![Mail Providers Add screen](images/Add-providers-screenshot.png)
+
+![Mail Providers listing screen](images/providers-list-screnshot.png)
+
+![Email Sync Jobs Add screen](images/Add-job-screenshot.png)
+
+![Email Sync Jobs listing screen](images/job-list-screenshot.png)
 
 
 ##  Contributing
