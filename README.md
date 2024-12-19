@@ -15,6 +15,16 @@ Supported OAuth providers:
 * Azure AD (https://azure.microsoft.com)
 * Google (https://google.com)
 
+Configure OAuth callback url
+* Google
+```bash
+  https://mysite/auth/callback/gmail or http://localhost:3000/auth/callback/gmail
+```
+* Outlook
+```bash
+  https://mysite/auth/callback/outlook or http://localhost:3000/auth/callback/outlook
+```
+
 ## Installation
 
 ### Clone as Submodule
