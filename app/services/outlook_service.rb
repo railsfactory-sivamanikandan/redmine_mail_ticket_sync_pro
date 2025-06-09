@@ -107,13 +107,14 @@ class OutlookService
 
         # Fetch the email attachments
         attachments = fetch_attachments(email['id'], access_token)
+        description = extract_latest_reply_text(email['body']['content'])
         {
           subject: email['subject'],
           from: email.dig('from', 'emailAddress', 'address'),
           first_name: first_name,
           last_name: last_name,
           received_at: email['receivedDateTime'],
-          body: email['bodyPreview'],
+          body: description,
           id: email['id'],
           parent_id: conversation_emails.length > 1 && index != 0 ? sorted_emails.first['id'] : nil,
           attachments: attachments,
@@ -190,5 +191,19 @@ class OutlookService
   # Log specific errors
   def log_error(message)
     Rails.logger.error(message)
+  end
+
+  def extract_latest_reply_text(html_body)
+    # Remove HTML comments before parsing
+    html_body = html_body.gsub(/<!--.*?-->/m, '')
+    # Then parse and clean up
+    plain_text = Nokogiri::HTML(html_body).text.gsub("\r", '').strip
+    # Match inline Outlook header
+    reply_pattern = /From:.*?Sent:.*?To:.*?Subject:.*?$/m
+    if (match = plain_text.match(reply_pattern))
+      plain_text[0...match.begin(0)].strip
+    else
+      plain_text
+    end
   end
 end
