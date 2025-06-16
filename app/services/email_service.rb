@@ -193,8 +193,16 @@ class EmailService
   def add_attachments(email, issue, user, journal_create = false)
     return unless email[:attachments]&.any?
 
+    existing_attachments = issue.attachments.to_a
     email[:attachments].each do |attachment|
       attachment_content = Base64.decode64(attachment[:content])
+
+      already_attached = existing_attachments.any? do |existing|
+        existing.filename == attachment[:name] &&
+          existing.content_type == attachment[:content_type] &&
+          existing.filesize == attachment_content.bytesize
+      end
+      next if already_attached
       attachment_obj = issue.attachments.create(
         container: issue,
         file: attachment_content,
