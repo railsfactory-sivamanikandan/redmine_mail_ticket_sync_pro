@@ -318,7 +318,10 @@ class EmailService
 
     begin
       if redmine_version_4_or_later?
-        Mailer.deliver_issue_add(issue).deliver_now
+        users = issue.notified_users | issue.notified_watchers | issue.notified_mentions
+        users.each do |user|
+          Mailer.issue_add(user, issue).deliver_now
+        end
       else
         Mailer.issue_add(issue.author, issue).deliver_now
       end
