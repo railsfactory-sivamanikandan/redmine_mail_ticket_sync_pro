@@ -318,7 +318,7 @@ class EmailService
 
     begin
       if redmine_version_4_or_later?
-        Mailer.deliver_issue_add(issue)
+        Mailer.deliver_issue_add(issue).deliver_now
       else
         Mailer.issue_add(issue.author, issue).deliver_now
       end
