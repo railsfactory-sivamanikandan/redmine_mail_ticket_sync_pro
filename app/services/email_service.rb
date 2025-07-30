@@ -101,6 +101,7 @@ class EmailService
 
     if issue.save
       process_attachments_and_comments(email, issue, author)
+      send_issue_notifications(issue)
       { created: true }
     else
       log_issue_creation_failure(email[:subject], issue)
@@ -310,5 +311,32 @@ class EmailService
     result.concat(ungrouped_emails.map { |email| email.merge(children: []) })
 
     result
+  end
+
+  def send_issue_notifications(issue)
+    return unless Setting.notified_events.include?('issue_added')
+
+    begin
+      if redmine_version_4_or_later?
+        Mailer.issue_add(issue).deliver_now
+      else
+        Mailer.deliver_issue_add(issue)
+      end
+    rescue => e
+      Rails.logger.error "Failed to send issue notification: #{e.message}"
+      begin
+        if redmine_version_4_or_later?
+          Mailer.deliver_issue_add(issue)
+        else
+          Mailer.issue_add(issue).deliver_now
+        end
+      rescue => fallback_error
+        Rails.logger.error "Fallback notification method also failed: #{fallback_error.message}"
+      end
+    end
+  end
+
+  def redmine_version_4_or_later?
+    Redmine::VERSION::MAJOR >= 4
   end
 end
