@@ -318,21 +318,12 @@ class EmailService
 
     begin
       if redmine_version_4_or_later?
-        Mailer.issue_add(issue).deliver_now
-      else
         Mailer.deliver_issue_add(issue)
+      else
+        Mailer.issue_add(issue.author, issue).deliver_now
       end
     rescue => e
       Rails.logger.error "Failed to send issue notification: #{e.message}"
-      begin
-        if redmine_version_4_or_later?
-          Mailer.deliver_issue_add(issue)
-        else
-          Mailer.issue_add(issue).deliver_now
-        end
-      rescue => fallback_error
-        Rails.logger.error "Fallback notification method also failed: #{fallback_error.message}"
-      end
     end
   end
 
