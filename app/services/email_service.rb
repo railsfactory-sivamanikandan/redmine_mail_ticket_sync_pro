@@ -196,6 +196,7 @@ class EmailService
 
     existing_attachments = issue.attachments.to_a
     email[:attachments].each do |attachment|
+      next unless attachment[:content].present?
       attachment_content = Base64.decode64(attachment[:content])
 
       already_attached = existing_attachments.any? do |existing|
