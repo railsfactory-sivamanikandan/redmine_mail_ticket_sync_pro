@@ -1,5 +1,5 @@
 class SchedulerFileGenerator
-  SCHEDULE_FILE_PATH = Rails.root.join('config', 'schedule.rb').freeze
+  SCHEDULE_FILE_PATH = Rails.root.join('config', 'mail_sync_schedule.rb').freeze
 
   # Entry point to update the schedule
   def self.update_schedule
@@ -44,6 +44,6 @@ class SchedulerFileGenerator
 
   # Reload the whenever configuration to apply changes
   def reload_whenever_schedule
-    system('whenever --update-crontab')
+    system("whenever --update-crontab dynamic_mail_sync_jobs --load-file #{SCHEDULE_FILE_PATH}")
   end
 end
