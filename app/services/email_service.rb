@@ -123,8 +123,8 @@ class EmailService
 
   def issue_params(email, author)
     {
-      subject: email[:subject],
-      description: email[:body],
+      subject: strip_emoji(email[:subject]),
+      description: strip_emoji(email[:body]),
       status_id: 1, # Open status
       author_id: author.try(:id) || 1,
       tracker_id: @tracker,
@@ -133,6 +133,14 @@ class EmailService
       start_date: start_date_for_issue,
       email_message_id: email[:conversation_id],
     }
+  end
+
+  def strip_emoji(text)
+    return "" if text.nil?
+    # 1. Ensure text is valid UTF-8 (replace invalid/undefined bytes)
+    clean = text.encode("UTF-8", invalid: :replace, undef: :replace, replace: "")
+    # 2. Remove ALL 4-byte UTF-8 chars (emojis, rare symbols, flags, etc.)
+    clean.gsub(/[^\u0000-\uFFFF]/, "")
   end
 
   def start_date_for_issue
